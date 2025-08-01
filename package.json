@@ -1,0 +1,53 @@
+{
+  "name": "electron-covamo",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"vite\" \"npm:backend\" \"wait-on http://localhost:5173 && electron .\"",
+    "backend": "python3 backend/app.py",
+    "build": "vite build",
+    "electron:build": "electron-builder"
+  },
+  "dependencies": {
+    "vue": "^3.5.17"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.0",
+    "concurrently": "^9.2.0",
+    "electron": "^37.2.4",
+    "electron-builder": "^26.0.12",
+    "vite": "^7.0.4",
+    "wait-on": "^8.0.4"
+  },
+  "main": "electron/main.cjs",
+  "build": {
+  "appId": "be.jouwbedrijf.covamo",
+  "productName": "Covamo Electron",
+  "files": [
+    "dist",
+    "electron",
+    "backend",
+    "!**/*.ts",
+    "!**/*.map"
+  ],
+  "directories": {
+    "buildResources": "assets"
+  },
+  "asar": false,
+  "win": {
+    "target": "nsis",
+    "icon": "assets/icon.ico"
+  },
+  "nsis": {
+    "oneClick": false,
+    "perMachine": false,
+    "allowToChangeInstallationDirectory": true
+  }
+  },
+
+    "directories": {
+      "buildResources": "assets"
+    },
+    "asar": false
+  }
