@@ -1,9 +1,9 @@
-name: Build Windows Installer
+name: Build Windows App
 
 on:
   push:
-    tags:
-      - 'v*'  # Triggert bij push van tags zoals v1.0.0
+    branches:
+      - main
 
 jobs:
   build:
@@ -13,10 +13,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Use Node.js
+      - name: 🧱 Node.js installeren
         uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: 18
 
       - name: Install dependencies
         run: npm install
@@ -27,11 +27,9 @@ jobs:
       - name: Build Electron app
         run: npm run electron:build
 
-      - name: Upload installer to GitHub Releases
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: 💾 Upload Windows installer (.exe)
+        uses: actions/upload-artifact@v4
         with:
-          files: |
+          name: windows-installer
+          path: |
             dist/*.exe
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
