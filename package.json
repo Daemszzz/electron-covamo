@@ -1,10 +1,10 @@
 {
   "name": "electron-covamo",
+  "version": "1.0.0",
   "private": true,
   "description": "Yellow document",
   "author": "Daems Kevin",
-  "version": "0.0.0",
-  "type": "module",
+  "main": "electron/main.cjs",
   "scripts": {
     "dev": "concurrently \"vite\" \"npm:backend\" \"wait-on http://localhost:5173 && electron .\"",
     "backend": "python3 backend/app.py",
@@ -22,7 +22,6 @@
     "vite": "^7.0.4",
     "wait-on": "^8.0.4"
   },
-  "main": "electron/main.cjs",
   "build": {
     "appId": "be.jouwbedrijf.covamo",
     "productName": "Covamo Electron",
@@ -33,15 +32,17 @@
       "!**/*.ts",
       "!**/*.map"
     ],
-    "directories": {
-      "buildResources": "assets"
+  "mac": {
+    "target": "dmg",
+    "category": "public.app-category.productivity",
+    "icon": "build/icon.icns"
     },
-    "asar": false,
-    "win": {
-      "target": "nsis",
-      "icon": "assets/icon.ico"
+  "win": {
+    "target": "nsis",
+    "icon": "build/icon.ico",
+    "publish": null
     },
-    "nsis": {
+  "nsis": {
       "oneClick": false,
       "perMachine": false,
       "allowToChangeInstallationDirectory": true
