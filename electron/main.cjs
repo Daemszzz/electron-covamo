@@ -13,7 +13,6 @@ function createWindow() {
   });
 
   if (isDev) {
-    win.webContents.openDevTools();
     win.loadURL("http://localhost:5173");
   } else {
     win.loadFile(path.join(__dirname, "../dist/index.html"));

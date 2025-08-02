@@ -193,9 +193,10 @@ const zoekWagen = async () => {
     loading.value = false;
     return;
   }
+  console.log("API URL:", apiUrl);
 
   try {
-    const response = await axios.get(`${apiUrl}/api/zoek/${zoekId.value}`);
+    const response = await axios.get(`${apiUrl}/zoek/${zoekId.value}`);
     wagen.value = {
       ...response.data,
       vorigeEigenaar: "",

@@ -1,0 +1,10 @@
+flask
+flask-cors
+selenium
+python-dotenv
+selenium.webdriver.common.by
+selenium.webdriver.support.ui
+selenium.webdriver.support
+selenium.webdriver.firefox.options
+flask_cors
+dotenv

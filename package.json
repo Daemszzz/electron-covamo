@@ -1,6 +1,8 @@
 {
   "name": "electron-covamo",
   "private": true,
+  "description": "Electron app for yellow document",
+  "author": "Daems Kevin",
   "version": "0.0.0",
   "type": "module",
   "scripts": {
@@ -21,18 +23,19 @@
     "wait-on": "^8.0.4"
   },
   "main": "electron/main.cjs",
-  "build": {
-  "appId": "be.jouwbedrijf.covamo",
-  "productName": "Covamo Electron",
-  "files": [
-    "dist",
-    "electron",
-    "backend",
-    "!**/*.ts",
-    "!**/*.map"
-  ],
-  "directories": {
-    "buildResources": "assets"
+    "build": {
+    "appId": "be.jouwbedrijf.covamo",
+    "productName": "Covamo Electron",
+    "files": [
+      "dist",
+      "electron",
+      "backend",
+      "!**/*.ts",
+      "!**/*.map"
+    ],
+    "directories": {
+      "buildResources": "assets"
+    }
   },
   "asar": false,
   "win": {
@@ -44,10 +47,4 @@
     "perMachine": false,
     "allowToChangeInstallationDirectory": true
   }
-  },
-
-    "directories": {
-      "buildResources": "assets"
-    },
-    "asar": false
-  }
+}
