@@ -1,7 +1,7 @@
 {
   "name": "electron-covamo",
   "private": true,
-  "description": "Electron app for yellow document",
+  "description": "Yellow document",
   "author": "Daems Kevin",
   "version": "0.0.0",
   "type": "module",
