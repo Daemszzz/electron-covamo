@@ -23,21 +23,21 @@
     "wait-on": "^8.0.4"
   },
   "main": "electron/main.cjs",
-    "build": {
-    "appId": "be.jouwbedrijf.covamo",
-    "productName": "Covamo Electron",
-    "files": [
-      "dist",
-      "electron",
-      "backend",
-      "!**/*.ts",
-      "!**/*.map"
-    ],
-    "directories": {
-      "buildResources": "assets"
-    }
+  "build": {
+  "appId": "be.jouwbedrijf.covamo",
+  "productName": "Covamo Electron",
+  "files": [
+    "dist",
+    "electron",
+    "backend",
+    "!**/*.ts",
+    "!**/*.map"
+  ],
+  "directories": {
+    "buildResources": "assets"
   },
   "asar": false,
+  "publish": "never",
   "win": {
     "target": "nsis",
     "icon": "assets/icon.ico"
@@ -47,4 +47,5 @@
     "perMachine": false,
     "allowToChangeInstallationDirectory": true
   }
+}
 }
