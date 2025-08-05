@@ -25,6 +25,7 @@
   "build": {
     "appId": "be.jouwbedrijf.covamo",
     "productName": "Covamo Electron",
+    "asar": true,
     "files": [
       "dist",
       "electron",
@@ -32,17 +33,23 @@
       "!**/*.ts",
       "!**/*.map"
     ],
-  "mac": {
-    "target": "dmg",
-    "category": "public.app-category.productivity",
-    "icon": "build/icon.icns"
+    "extraResources": [
+      {
+        "from": "backend",
+        "to": "backend"
+      }
+    ],
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.productivity",
+      "icon": "build/icon.icns"
     },
-  "win": {
-    "target": "nsis",
-    "icon": "build/icon.ico",
-    "publish": null
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.ico",
+      "publish": null
     },
-  "nsis": {
+    "nsis": {
       "oneClick": false,
       "perMachine": false,
       "allowToChangeInstallationDirectory": true
