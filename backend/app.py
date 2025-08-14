@@ -99,10 +99,11 @@ def zoek_voertuig(zoek_id):
 if __name__ == "__main__":
     import sys
 
-    port = 5001  # Prod port consistent met Electron
+    port = 8000  # Prod port consistent met Electron
     for arg in sys.argv:
         if arg.startswith("--port="):
             port = int(arg.split("=")[1])
 
-    # debug=False voor standalone executable
+    print(f"🚀 Backend gestart op poort {port}")  # optioneel voor logging
     app.run(host="0.0.0.0", port=port, debug=False)
+

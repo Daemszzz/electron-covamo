@@ -1,6 +1,9 @@
 const { spawn } = require("child_process");
 const path = require("path");
 const os = require("os");
+const fs = require("fs");
+
+const PORT = 8000; // dev en prod consistent
 
 function getVenvPythonPath() {
   const baseVenv = path.join(__dirname, "..", "venv");
@@ -15,9 +18,14 @@ function startBackend() {
   const pythonPath = getVenvPythonPath();
   const script = path.join(__dirname, "..", "backend", "app.py");
 
-  console.log("🚀 Start backend op poort 8000");
+  if (!fs.existsSync(pythonPath)) {
+    console.error("❌ Python executable niet gevonden in venv:", pythonPath);
+    process.exit(1);
+  }
 
-  const backend = spawn(pythonPath, [script, "--port=5001"], {
+  console.log(`🚀 Start backend (dev) op poort ${PORT}`);
+
+  const backend = spawn(pythonPath, [script, `--port=${PORT}`], {
     stdio: "inherit",
   });
 

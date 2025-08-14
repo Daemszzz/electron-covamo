@@ -11,7 +11,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       "/api": {
-        target: "http://127.0.0.1:5001", // backend poort
+        target: "http://127.0.0.1:8000", // backend poort consistent met main.cjs
         changeOrigin: true,
         secure: false,
       },
@@ -20,8 +20,8 @@ export default defineConfig({
   define: {
     "import.meta.env.VITE_API_URL": JSON.stringify(
       process.env.NODE_ENV === "development"
-        ? "http://127.0.0.1:5001" // dev backend
-        : "http://127.0.0.1:5001" // prod backend
+        ? "http://127.0.0.1:8000" // dev backend
+        : "http://127.0.0.1:8000" // prod backend
     ),
   },
 });

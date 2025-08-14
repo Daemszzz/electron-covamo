@@ -1,11 +1,11 @@
 const { app, BrowserWindow } = require("electron");
 const path = require("path");
 const { spawn } = require("child_process");
+const os = require("os");
 
 const isDev = !app.isPackaged;
 let backendProcess = null;
-
-const API_PORT = 5001;
+const API_PORT = 8000; // standaard backend poort
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -25,17 +25,27 @@ function createWindow() {
   }
 }
 
+function getBackendPath() {
+  if (isDev) return null; // dev gebruikt start-backend.js
+
+  const base = path.join(process.resourcesPath, "backend");
+
+  if (os.platform() === "win32") return path.join(base, "app.exe");
+  else return path.join(base, "app"); // Mac/Linux
+}
+
 function startBackend() {
   if (isDev) return;
 
-  const backendExe = path.join(
-    process.resourcesPath,
-    "backend",
-    "app.exe"
-  );
-  console.log("🚀 Start backend via:", backendExe);
+  const backendPath = getBackendPath();
+  if (!backendPath) return;
 
-  backendProcess = spawn(backendExe, [], { shell: true, stdio: "inherit" });
+  console.log("🚀 Start backend via:", backendPath);
+
+  backendProcess = spawn(backendPath, [`--port=${API_PORT}`], {
+    shell: true,
+    stdio: "inherit",
+  });
 
   backendProcess.on("error", (err) => {
     console.error("❌ Fout bij starten backend:", err);
