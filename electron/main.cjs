@@ -22,8 +22,10 @@ function createWindow() {
     win.loadURL("http://localhost:5173");
     win.webContents.openDevTools();
   } else {
-    const indexPath = path.join(__dirname, "../dist/index.html");
-    win.loadFile(indexPath);
+    const indexPath = path.join(process.resourcesPath, "dist", "index.html");
+    win.loadFile(indexPath).catch((err) => {
+      console.error("❌ Kan index.html niet laden:", err);
+    });
   }
 }
 
@@ -82,7 +84,8 @@ function startBackend() {
 
   backendProcess = spawn(backendPath, [`--port=${API_PORT}`], {
     shell: true,
-    stdio: "inherit",
+    stdio: "ignore",
+    windowsHide: true,
   });
 
   backendProcess.on("error", (err) => {
