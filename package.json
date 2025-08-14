@@ -36,6 +36,7 @@
       "backend/dist",
       "backend/.env.enc",
       "main.cjs",
+      "package.json",
       "!**/*.ts",
       "!**/*.map"
     ],

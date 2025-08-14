@@ -77,15 +77,16 @@ function startBackend() {
 
   decryptEnv();
 
-  const backendPath = getBackendPath();
-  if (!backendPath) return;
+  const backendPath = isDev
+    ? path.join(__dirname, "backend", "launcher.py") // dev pad
+    : path.join(process.resourcesPath, "backend", "launcher.py");
 
   console.log("🚀 Start backend via:", backendPath);
 
-  backendProcess = spawn(backendPath, [`--port=${API_PORT}`], {
+  backendProcess = spawn("python", [backendPath, `--port=${API_PORT}`], {
     shell: true,
-    stdio: "ignore",
-    windowsHide: true,
+    stdio: isDev ? "inherit" : "ignore",
+    windowsHide: !isDev, // verberg console in productie
   });
 
   backendProcess.on("error", (err) => {
