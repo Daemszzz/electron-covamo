@@ -4,11 +4,40 @@ const { spawn } = require("child_process");
 const os = require("os");
 const fs = require("fs");
 const crypto = require("crypto");
+const http = require("http");
 
 const isDev = !app.isPackaged;
 let backendProcess = null;
-const API_PORT = 8000; // standaard backend poort
+const API_PORT = 8000;
 
+// Wacht tot backend bereikbaar is
+async function waitForBackend() {
+  const maxRetries = 20;
+  const delay = (ms) => new Promise((res) => setTimeout(res, ms));
+
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      await new Promise((resolve, reject) => {
+        http
+          .get(`http://localhost:${API_PORT}`, (res) => {
+            if (res.statusCode < 500) resolve();
+            else reject();
+          })
+          .on("error", reject);
+      });
+      console.log("✅ Backend is bereikbaar");
+      return;
+    } catch {
+      console.log(`⏳ Wachten op backend... (${i + 1}/${maxRetries})`);
+      await delay(500);
+    }
+  }
+
+  console.error("❌ Backend startte niet op tijd");
+  app.quit();
+}
+
+// Electron venster maken
 function createWindow() {
   const win = new BrowserWindow({
     width: 1200,
@@ -22,13 +51,16 @@ function createWindow() {
     win.loadURL("http://localhost:5173");
     win.webContents.openDevTools();
   } else {
-    const indexPath = path.join(__dirname, "../dist/index.html");
-    win.loadFile(indexPath);
+    const indexPath = path.join(process.resourcesPath, "dist", "index.html");
+    win
+      .loadFile(indexPath)
+      .catch((err) => console.error("❌ Kan index.html niet laden:", err));
   }
 }
 
+// Decrypt .env in productie
 function decryptEnv() {
-  if (isDev) return; // Dev gebruikt eigen .env
+  if (isDev) return;
 
   const secretKey = process.env.ENV_SECRET_KEY;
   if (!secretKey) {
@@ -55,34 +87,42 @@ function decryptEnv() {
   );
 
   const decrypted = Buffer.concat([decipher.update(content), decipher.final()]);
-  const envPath = path.join(process.resourcesPath, "backend", ".env");
 
+  const envPath = path.join(process.resourcesPath, "backend", ".env");
   fs.writeFileSync(envPath, decrypted);
   console.log("✅ .env gedecodeerd en geschreven naar:", envPath);
 }
 
+// Backend pad bepalen
 function getBackendPath() {
-  if (isDev) return null; // dev gebruikt start-backend.js
+  const base = isDev
+    ? path.join(__dirname, "..", "backend", "dist")
+    : path.join(process.resourcesPath, "backend");
 
-  const base = path.join(process.resourcesPath, "backend");
-
-  if (os.platform() === "win32") return path.join(base, "app.exe");
-  else return path.join(base, "app"); // Mac/Linux
+  if (os.platform() === "win32") {
+    return path.join(base, isDev ? "app.exe" : "app.exe");
+  } else {
+    return path.join(base, "app");
+  }
 }
 
-function startBackend() {
-  if (isDev) return;
-
+// Backend starten
+async function startBackend() {
   decryptEnv();
 
   const backendPath = getBackendPath();
-  if (!backendPath) return;
+  if (!fs.existsSync(backendPath)) {
+    console.error("❌ Geen backend executable gevonden:", backendPath);
+    app.quit();
+    return;
+  }
 
   console.log("🚀 Start backend via:", backendPath);
 
   backendProcess = spawn(backendPath, [`--port=${API_PORT}`], {
     shell: true,
-    stdio: "inherit",
+    stdio: isDev ? "inherit" : "ignore",
+    windowsHide: !isDev,
   });
 
   backendProcess.on("error", (err) => {
@@ -92,8 +132,11 @@ function startBackend() {
   backendProcess.on("exit", (code) => {
     console.log(`ℹ️ Backend gestopt met code ${code}`);
   });
+
+  await waitForBackend();
 }
 
+// Backend stoppen
 function stopBackend() {
   if (backendProcess) {
     backendProcess.kill();
@@ -101,16 +144,16 @@ function stopBackend() {
   }
 }
 
-app.whenReady().then(() => {
-  startBackend();
+app.whenReady().then(async () => {
+  await startBackend();
   createWindow();
-
-  app.on("activate", () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
-  });
 });
 
 app.on("window-all-closed", () => {
   stopBackend();
   if (process.platform !== "darwin") app.quit();
+});
+
+app.on("activate", () => {
+  if (BrowserWindow.getAllWindows().length === 0) createWindow();
 });
