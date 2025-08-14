@@ -17,7 +17,7 @@ function startBackend() {
 
   console.log("🚀 Start backend op poort 8000");
 
-  const backend = spawn(pythonPath, [script, "--port=8000"], {
+  const backend = spawn(pythonPath, [script, "--port=5001"], {
     stdio: "inherit",
   });
 

@@ -205,7 +205,11 @@ const zoekWagen = async () => {
       keuringskaart: false,
     };
   } catch (err) {
-    error.value = "Voertuig niet gevonden of fout bij ophalen.";
+    if (err.response && err.response.data && err.response.data.error) {
+      error.value = err.response.data.error;
+    } else {
+      error.value = "Voertuig niet gevonden of fout bij ophalen.";
+    }
   } finally {
     loading.value = false;
   }

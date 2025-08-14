@@ -1,10 +1,11 @@
 const { app, BrowserWindow } = require("electron");
 const path = require("path");
 const { spawn } = require("child_process");
-const os = require("os");
 
 const isDev = !app.isPackaged;
 let backendProcess = null;
+
+const API_PORT = 5001;
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -24,29 +25,17 @@ function createWindow() {
   }
 }
 
-function getVenvPythonPath() {
-  const baseVenv = isDev
-    ? path.join(__dirname, "..", "venv")
-    : path.join(process.resourcesPath, "venv");
-
-  if (os.platform() === "win32") {
-    return path.join(baseVenv, "Scripts", "python.exe");
-  } else {
-    return path.join(baseVenv, "bin", "python3");
-  }
-}
-
 function startBackend() {
-  if (isDev) return; // In dev via script
+  if (isDev) return;
 
-  const script = path.join(process.resourcesPath, "backend", "app.py");
-  const pythonPath = getVenvPythonPath();
+  const backendExe = path.join(
+    process.resourcesPath,
+    "backend",
+    "app.exe"
+  );
+  console.log("🚀 Start backend via:", backendExe);
 
-  console.log("🚀 Start backend (prod) op poort 8000");
-
-  backendProcess = spawn(pythonPath, [script, "--port=8000"], {
-    stdio: "inherit",
-  });
+  backendProcess = spawn(backendExe, [], { shell: true, stdio: "inherit" });
 
   backendProcess.on("error", (err) => {
     console.error("❌ Fout bij starten backend:", err);

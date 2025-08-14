@@ -98,8 +98,11 @@ def zoek_voertuig(zoek_id):
 
 if __name__ == "__main__":
     import sys
-    port = 8000  # default
+
+    port = 5001  # Prod port consistent met Electron
     for arg in sys.argv:
         if arg.startswith("--port="):
             port = int(arg.split("=")[1])
-    app.run(host="0.0.0.0", port=port, debug=True)
+
+    # debug=False voor standalone executable
+    app.run(host="0.0.0.0", port=port, debug=False)
