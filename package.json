@@ -25,40 +25,37 @@
     "wait-on": "^8.0.4"
   },
   "build": {
-    "appId": "be.jouwbedrijf.covamo",
-    "productName": "Covamo Electron",
-    "asar": true,
-    "files": [
-      "dist",
-      "electron",
-      "backend",
-      "!**/*.ts",
-      "!**/*.map"
-    ],
-    "extraResources": [
-      {
-        "from": "backend",
-        "to": "backend"
-      },
-      {
-        "from": "venv",
-        "to": "venv"
-      }
-    ],
-    "mac": {
-      "target": "dmg",
-      "category": "public.app-category.productivity",
-      "icon": "build/icon.icns"
-    },
-    "win": {
-      "target": "nsis",
-      "icon": "build/icon.ico",
-      "publish": null
-    },
-    "nsis": {
-      "oneClick": false,
-      "perMachine": false,
-      "allowToChangeInstallationDirectory": true
+  "appId": "be.jouwbedrijf.covamo",
+  "productName": "Covamo Electron",
+  "asar": true,
+  "publish": null,
+  "files": [
+    "dist",
+    "electron",
+    "backend/dist",
+    "!**/*.ts",
+    "!**/*.map"
+  ],
+  "extraResources": [
+    {
+      "from": "backend/dist",
+      "to": "backend"
     }
+  ],
+  "mac": {
+    "target": "dmg",
+    "category": "public.app-category.productivity",
+    "icon": "build/icon.icns"
+  },
+  "win": {
+    "target": "nsis",
+    "icon": "build/icon.ico",
+    "publish": null
+  },
+  "nsis": {
+    "oneClick": false,
+    "perMachine": false,
+    "allowToChangeInstallationDirectory": true
   }
+}
 }
