@@ -19,7 +19,7 @@ jobs:
           node-version: 20
 
       - name: Install Node dependencies
-        run: npm ci
+        run: npm install
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -52,7 +52,7 @@ jobs:
           ENV_SECRET_KEY: ${{ secrets.ENV_SECRET_KEY }}
 
       - name: Build Electron Windows App
-        run: npx electron-builder --win
+        run: npm run electron:build
         env:
           ENV_SECRET_KEY: ${{ secrets.ENV_SECRET_KEY }}
 
@@ -75,7 +75,7 @@ jobs:
           node-version: 20
 
       - name: Install Node dependencies
-        run: npm ci
+        run: npm install
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -105,7 +105,7 @@ jobs:
           ENV_SECRET_KEY: ${{ secrets.ENV_SECRET_KEY }}
 
       - name: Build Electron macOS App
-        run: npx electron-builder --mac
+        run: npm run electron:build:mac
         env:
           ENV_SECRET_KEY: ${{ secrets.ENV_SECRET_KEY }}
 

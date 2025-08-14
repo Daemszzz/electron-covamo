@@ -4,13 +4,11 @@ const { spawn } = require("child_process");
 const os = require("os");
 const fs = require("fs");
 const crypto = require("crypto");
-const http = require("http");
 
 const isDev = !app.isPackaged;
 let backendProcess = null;
-const API_PORT = 8000;
+const API_PORT = 8000; // standaard backend poort
 
-// Wacht tot backend bereikbaar is
 async function waitForBackend() {
   const maxRetries = 20;
   const delay = (ms) => new Promise((res) => setTimeout(res, ms));
@@ -18,12 +16,10 @@ async function waitForBackend() {
   for (let i = 0; i < maxRetries; i++) {
     try {
       await new Promise((resolve, reject) => {
-        http
-          .get(`http://localhost:${API_PORT}`, (res) => {
-            if (res.statusCode < 500) resolve();
-            else reject();
-          })
-          .on("error", reject);
+        http.get(`http://localhost:${API_PORT}`, (res) => {
+          if (res.statusCode < 500) resolve();
+          else reject();
+        }).on("error", reject);
       });
       console.log("✅ Backend is bereikbaar");
       return;
@@ -37,7 +33,6 @@ async function waitForBackend() {
   app.quit();
 }
 
-// Electron venster maken
 function createWindow() {
   const win = new BrowserWindow({
     width: 1200,
@@ -52,15 +47,14 @@ function createWindow() {
     win.webContents.openDevTools();
   } else {
     const indexPath = path.join(process.resourcesPath, "dist", "index.html");
-    win
-      .loadFile(indexPath)
-      .catch((err) => console.error("❌ Kan index.html niet laden:", err));
+  win.loadFile(indexPath).catch(err => 
+    console.error("❌ Kan index.html niet laden:", err)
+  );
   }
 }
 
-// Decrypt .env in productie
 function decryptEnv() {
-  if (isDev) return;
+  if (isDev) return; // Dev gebruikt eigen .env
 
   const secretKey = process.env.ENV_SECRET_KEY;
   if (!secretKey) {
@@ -87,42 +81,34 @@ function decryptEnv() {
   );
 
   const decrypted = Buffer.concat([decipher.update(content), decipher.final()]);
-
   const envPath = path.join(process.resourcesPath, "backend", ".env");
+
   fs.writeFileSync(envPath, decrypted);
   console.log("✅ .env gedecodeerd en geschreven naar:", envPath);
 }
 
-// Backend pad bepalen
 function getBackendPath() {
-  const base = isDev
-    ? path.join(__dirname, "..", "backend", "dist")
-    : path.join(process.resourcesPath, "backend");
+  if (isDev) return null; // dev gebruikt start-backend.js
 
-  if (os.platform() === "win32") {
-    return path.join(base, isDev ? "app.exe" : "app.exe");
-  } else {
-    return path.join(base, "app");
-  }
+  const base = path.join(process.resourcesPath, "backend");
+
+  if (os.platform() === "win32") return path.join(base, "app.exe");
+  else return path.join(base, "app"); // Mac/Linux
 }
 
-// Backend starten
-async function startBackend() {
+function startBackend() {
+  if (isDev) return;
+
   decryptEnv();
 
   const backendPath = getBackendPath();
-  if (!fs.existsSync(backendPath)) {
-    console.error("❌ Geen backend executable gevonden:", backendPath);
-    app.quit();
-    return;
-  }
+  if (!backendPath) return;
 
   console.log("🚀 Start backend via:", backendPath);
 
   backendProcess = spawn(backendPath, [`--port=${API_PORT}`], {
     shell: true,
-    stdio: isDev ? "inherit" : "ignore",
-    windowsHide: !isDev,
+    stdio: "inherit",
   });
 
   backendProcess.on("error", (err) => {
@@ -132,11 +118,8 @@ async function startBackend() {
   backendProcess.on("exit", (code) => {
     console.log(`ℹ️ Backend gestopt met code ${code}`);
   });
-
-  await waitForBackend();
 }
 
-// Backend stoppen
 function stopBackend() {
   if (backendProcess) {
     backendProcess.kill();
@@ -144,16 +127,16 @@ function stopBackend() {
   }
 }
 
-app.whenReady().then(async () => {
-  await startBackend();
+app.whenReady().then(() => {
+  startBackend();
   createWindow();
+
+  app.on("activate", () => {
+    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+  });
 });
 
 app.on("window-all-closed", () => {
   stopBackend();
   if (process.platform !== "darwin") app.quit();
-});
-
-app.on("activate", () => {
-  if (BrowserWindow.getAllWindows().length === 0) createWindow();
 });
