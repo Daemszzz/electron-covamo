@@ -96,5 +96,10 @@ def zoek_voertuig(zoek_id):
     finally:
         driver.quit()
 
-if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=5000, debug=True, use_reloader=False)
+if __name__ == "__main__":
+    import sys
+    port = 8000  # default
+    for arg in sys.argv:
+        if arg.startswith("--port="):
+            port = int(arg.split("=")[1])
+    app.run(host="0.0.0.0", port=port, debug=True)

@@ -6,10 +6,10 @@
   "author": "Daems Kevin",
   "main": "electron/main.cjs",
   "scripts": {
-    "dev": "concurrently \"vite\" \"npm:backend\" \"wait-on http://localhost:5173 && electron .\"",
-    "backend": "python3 backend/app.py",
-    "build": "vite build",
-    "electron:build": "electron-builder"
+  "dev": "concurrently \"vite\" \"npm run backend-auto\" \"wait-on http://localhost:5173 && electron .\"",
+  "backend-auto": "node scripts/start-backend.js",
+  "build": "vite build",
+  "electron:build": "electron-builder"
   },
   "dependencies": {
     "vue": "^3.5.17"
@@ -17,6 +17,7 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.0",
     "concurrently": "^9.2.0",
+    "cross-env": "^7.0.3",
     "electron": "^37.2.4",
     "electron-builder": "^26.0.12",
     "vite": "^7.0.4",
@@ -37,6 +38,10 @@
       {
         "from": "backend",
         "to": "backend"
+      },
+      {
+        "from": "venv",
+        "to": "venv"
       }
     ],
     "mac": {

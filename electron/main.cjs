@@ -1,6 +1,7 @@
 const { app, BrowserWindow } = require("electron");
 const path = require("path");
 const { spawn } = require("child_process");
+const os = require("os");
 
 const isDev = !app.isPackaged;
 let backendProcess = null;
@@ -15,33 +16,51 @@ function createWindow() {
   });
 
   if (isDev) {
-    win.webContents.openDevTools();
     win.loadURL("http://localhost:5173");
-  } else {
     win.webContents.openDevTools();
+  } else {
     const indexPath = path.join(__dirname, "../dist/index.html");
     win.loadFile(indexPath);
   }
 }
 
-function startBackend() {
-  const script = isDev
-    ? "backend/app.py"
-    : path.join(__dirname, "..", "backend", "app.py");
+function getVenvPythonPath() {
+  const baseVenv = isDev
+    ? path.join(__dirname, "..", "venv")
+    : path.join(process.resourcesPath, "venv");
 
-  //127.0.0.1:5000/api/zoek/TEST
-  http: backendProcess = spawn("python3", [script], {
+  if (os.platform() === "win32") {
+    return path.join(baseVenv, "Scripts", "python.exe");
+  } else {
+    return path.join(baseVenv, "bin", "python3");
+  }
+}
+
+function startBackend() {
+  if (isDev) return; // In dev via script
+
+  const script = path.join(process.resourcesPath, "backend", "app.py");
+  const pythonPath = getVenvPythonPath();
+
+  console.log("🚀 Start backend (prod) op poort 8000");
+
+  backendProcess = spawn(pythonPath, [script, "--port=8000"], {
     stdio: "inherit",
   });
 
   backendProcess.on("error", (err) => {
-    console.error("Fout bij starten backend:", err);
+    console.error("❌ Fout bij starten backend:", err);
+  });
+
+  backendProcess.on("exit", (code) => {
+    console.log(`ℹ️ Backend gestopt met code ${code}`);
   });
 }
 
 function stopBackend() {
   if (backendProcess) {
     backendProcess.kill();
+    backendProcess = null;
   }
 }
 
