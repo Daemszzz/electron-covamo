@@ -8,6 +8,7 @@ const crypto = require("crypto");
 const isDev = !app.isPackaged;
 let backendProcess = null;
 const API_PORT = 8000; // standaard backend poort
+const FRONTEND_DEV_URL = "http://localhost:5173";
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -19,7 +20,23 @@ function createWindow() {
   });
 
   if (isDev) {
-    win.loadURL("http://localhost:5173");
+    // Probeer Vite server te bereiken met retries
+    let attempts = 0;
+    const maxAttempts = 10;
+
+    const tryLoad = () => {
+      attempts++;
+      win.loadURL(FRONTEND_DEV_URL).catch(() => {
+        if (attempts < maxAttempts) {
+          console.log(`⏳ Wachten op Vite dev server... poging ${attempts}`);
+          setTimeout(tryLoad, 1000);
+        } else {
+          console.error("❌ Kan Vite dev server niet bereiken!");
+        }
+      });
+    };
+
+    tryLoad();
     win.webContents.openDevTools();
   } else {
     const indexPath = path.join(process.resourcesPath, "dist", "index.html");
@@ -64,29 +81,46 @@ function decryptEnv() {
 }
 
 function getBackendPath() {
-  if (isDev) return null; // dev gebruikt start-backend.js
+  const base = isDev
+    ? path.join(__dirname, "backend")
+    : path.join(process.resourcesPath, "backend");
 
-  const base = path.join(process.resourcesPath, "backend");
-
-  if (os.platform() === "win32") return path.join(base, "app.exe");
-  else return path.join(base, "app"); // Mac/Linux
+  if (os.platform() === "win32") {
+    return isDev
+      ? path.join(base, "launcher.py") // dev gebruikt python script
+      : path.join(base, "app.exe"); // prod gebruikt exe
+  } else {
+    return isDev ? path.join(base, "launcher.py") : path.join(base, "app");
+  }
 }
 
 function startBackend() {
-  if (isDev) return;
-
   decryptEnv();
 
-  const backendPath = isDev
-    ? path.join(__dirname, "backend", "launcher.py") // dev pad
-    : path.join(process.resourcesPath, "backend", "launcher.py");
+  const backendPath = getBackendPath();
 
-  console.log("🚀 Start backend via:", backendPath);
+  if (!fs.existsSync(backendPath)) {
+    console.error("❌ Backend bestand niet gevonden:", backendPath);
+    app.quit();
+    return;
+  }
 
-  backendProcess = spawn("python", [backendPath, `--port=${API_PORT}`], {
+  let command, args;
+
+  if (backendPath.endsWith(".py")) {
+    command = "python";
+    args = [backendPath, `--port=${API_PORT}`];
+  } else {
+    command = backendPath; // exe of bin
+    args = [`--port=${API_PORT}`];
+  }
+
+  console.log(`🚀 Start backend: ${command} ${args.join(" ")}`);
+
+  backendProcess = spawn(command, args, {
     shell: true,
     stdio: isDev ? "inherit" : "ignore",
-    windowsHide: !isDev, // verberg console in productie
+    windowsHide: !isDev,
   });
 
   backendProcess.on("error", (err) => {
