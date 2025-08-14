@@ -2,10 +2,12 @@ const { app, BrowserWindow } = require("electron");
 const path = require("path");
 const { spawn } = require("child_process");
 const os = require("os");
+const fs = require("fs");
+const crypto = require("crypto");
 
 const isDev = !app.isPackaged;
 let backendProcess = null;
-const API_PORT = 8000; // standaard backend poort
+const API_PORT = 8000; // Prod backend poort
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -25,6 +27,40 @@ function createWindow() {
   }
 }
 
+function decryptEnv() {
+  if (isDev) return; // Dev gebruikt eigen .env
+
+  const secretKey = process.env.ENV_SECRET_KEY;
+  if (!secretKey) {
+    console.error("❌ ENV_SECRET_KEY is niet gezet!");
+    app.quit();
+    return;
+  }
+
+  const encPath = path.join(process.resourcesPath, "backend", ".env.enc");
+  if (!fs.existsSync(encPath)) {
+    console.error("❌ Versleutelde .env.enc niet gevonden!");
+    app.quit();
+    return;
+  }
+
+  const encryptedData = JSON.parse(fs.readFileSync(encPath, "utf-8"));
+  const iv = Buffer.from(encryptedData.iv, "hex");
+  const content = Buffer.from(encryptedData.content, "hex");
+
+  const decipher = crypto.createDecipheriv(
+    "aes-256-ctr",
+    crypto.createHash("sha256").update(secretKey).digest(),
+    iv
+  );
+
+  const decrypted = Buffer.concat([decipher.update(content), decipher.final()]);
+  const envPath = path.join(process.resourcesPath, "backend", ".env");
+
+  fs.writeFileSync(envPath, decrypted);
+  console.log("✅ .env gedecodeerd en geschreven naar:", envPath);
+}
+
 function getBackendPath() {
   if (isDev) return null; // dev gebruikt start-backend.js
 
@@ -36,6 +72,8 @@ function getBackendPath() {
 
 function startBackend() {
   if (isDev) return;
+
+  decryptEnv(); // eerst .env decoderen
 
   const backendPath = getBackendPath();
   if (!backendPath) return;
