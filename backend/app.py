@@ -7,8 +7,10 @@ from selenium.webdriver.firefox.options import Options
 from flask_cors import CORS
 from dotenv import load_dotenv
 import os
+import sys
 
-load_dotenv()
+env_path = os.path.join(os.path.dirname(__file__), ".env")
+load_dotenv(dotenv_path=env_path)
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
@@ -99,11 +101,11 @@ def zoek_voertuig(zoek_id):
 if __name__ == "__main__":
     import sys
 
-    port = 8000  # Prod port consistent met Electron
+    port = 8000
     for arg in sys.argv:
         if arg.startswith("--port="):
             port = int(arg.split("=")[1])
 
-    print(f"🚀 Backend gestart op poort {port}")  # optioneel voor logging
+    print(f"🚀 Backend gestart op poort {port}")
     app.run(host="0.0.0.0", port=port, debug=False)
 

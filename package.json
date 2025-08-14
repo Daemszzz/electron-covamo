@@ -40,6 +40,10 @@
     {
       "from": "backend/dist",
       "to": "backend"
+    },
+    {
+      "from": "backend/.env",
+      "to": "backend/.env"
     }
   ],
   "mac": {
