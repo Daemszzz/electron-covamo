@@ -48,9 +48,13 @@ jobs:
 
       - name: Build Vite frontend
         run: npm run build
+        env:
+          ENV_SECRET_KEY: ${{ secrets.ENV_SECRET_KEY }}
 
       - name: Build Electron Windows App
         run: npm run electron:build
+        env:
+          ENV_SECRET_KEY: ${{ secrets.ENV_SECRET_KEY }}
 
       - name: Upload Windows installer
         uses: actions/upload-artifact@v4
@@ -101,7 +105,7 @@ jobs:
       - name: Build Electron macOS App
         run: npm run electron:build:mac
         env:
-          GH_TOKEN: "" # voorkomt fout bij publish
+          ENV_SECRET_KEY: ${{ secrets.ENV_SECRET_KEY }}
 
       - name: Upload macOS installer
         uses: actions/upload-artifact@v4
