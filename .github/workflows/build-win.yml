@@ -101,6 +101,8 @@ jobs:
 
       - name: Build Vite frontend
         run: npm run build
+        env:
+          ENV_SECRET_KEY: ${{ secrets.ENV_SECRET_KEY }}
 
       - name: Build Electron macOS App
         run: npm run electron:build:mac
