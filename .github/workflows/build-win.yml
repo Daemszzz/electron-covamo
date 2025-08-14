@@ -78,6 +78,11 @@ jobs:
         with:
           python-version: 3.11
 
+      - name: Create .env for backend
+        run: |
+          echo "COVAMO_USERNAME=${{ secrets.COVAMO_USERNAME }}" >> backend/.env
+          echo "COVAMO_PASSWORD=${{ secrets.COVAMO_PASSWORD }}" >> backend/.env
+
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
