@@ -9,30 +9,6 @@ const isDev = !app.isPackaged;
 let backendProcess = null;
 const API_PORT = 8000; // standaard backend poort
 
-async function waitForBackend() {
-  const maxRetries = 20;
-  const delay = (ms) => new Promise((res) => setTimeout(res, ms));
-
-  for (let i = 0; i < maxRetries; i++) {
-    try {
-      await new Promise((resolve, reject) => {
-        http.get(`http://localhost:${API_PORT}`, (res) => {
-          if (res.statusCode < 500) resolve();
-          else reject();
-        }).on("error", reject);
-      });
-      console.log("✅ Backend is bereikbaar");
-      return;
-    } catch {
-      console.log(`⏳ Wachten op backend... (${i + 1}/${maxRetries})`);
-      await delay(500);
-    }
-  }
-
-  console.error("❌ Backend startte niet op tijd");
-  app.quit();
-}
-
 function createWindow() {
   const win = new BrowserWindow({
     width: 1200,
@@ -46,10 +22,8 @@ function createWindow() {
     win.loadURL("http://localhost:5173");
     win.webContents.openDevTools();
   } else {
-    const indexPath = path.join(process.resourcesPath, "dist", "index.html");
-  win.loadFile(indexPath).catch(err => 
-    console.error("❌ Kan index.html niet laden:", err)
-  );
+    const indexPath = path.join(__dirname, "../dist/index.html");
+    win.loadFile(indexPath);
   }
 }
 
