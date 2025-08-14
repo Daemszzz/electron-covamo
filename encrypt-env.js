@@ -6,7 +6,6 @@ const path = require("path");
 const envPath = path.join(__dirname, "backend/.env");
 const encryptedPath = path.join(__dirname, "backend/.env.enc");
 
-// Encryptiesleutel komt uit een GitHub Secret of lokaal ENV
 const secretKey = process.env.ENV_SECRET_KEY;
 if (!secretKey) {
   console.error("❌ ENV_SECRET_KEY is niet gezet!");
