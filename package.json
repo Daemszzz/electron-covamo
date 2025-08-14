@@ -9,12 +9,12 @@
   "prebuild": "node encrypt-env.js",
   "dev": "concurrently \"vite\" \"npm run backend-auto\" \"wait-on http://localhost:5173 && electron .\"",
   "backend-auto": "node scripts/start-backend.js",
-  "backend:build": "cd backend && npm install && npm run build",
+  "backend:build": "cd backend && npm install && npm run build-backend",
+  "build-backend": "pyinstaller --onefile app.py --distpath dist --workpath build --specpath .",
   "build": "npm run backend:build && vite build",
   "electron:build": "npm run build && electron-builder --win --x64",
   "electron:build:mac": "npm run build && electron-builder --mac"
-}
-,
+},
   "dependencies": {
     "vue": "^3.5.17"
   },
