@@ -35,6 +35,7 @@
       "electron",
       "backend/dist",
       "backend/.env.enc",
+      "main.cjs",
       "!**/*.ts",
       "!**/*.map"
     ],
