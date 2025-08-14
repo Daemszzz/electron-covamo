@@ -7,7 +7,7 @@ const crypto = require("crypto");
 
 const isDev = !app.isPackaged;
 let backendProcess = null;
-const API_PORT = 8000; // Prod backend poort
+const API_PORT = 8000; // standaard backend poort
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -73,7 +73,7 @@ function getBackendPath() {
 function startBackend() {
   if (isDev) return;
 
-  decryptEnv(); // eerst .env decoderen
+  decryptEnv();
 
   const backendPath = getBackendPath();
   if (!backendPath) return;
