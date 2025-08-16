@@ -19,6 +19,12 @@ function createWindow() {
       preload: path.join(__dirname, "preload.js"),
     },
   });
+  
+  win.webContents.on("did-finish-load", () => {
+    if (backendPort) {
+      win.webContents.send("backend-port", backendPort);
+    }
+  });
 
   if (isDev) {
     let attempts = 0;
@@ -50,12 +56,6 @@ function createWindow() {
     });
   }
 }
-
-win.webContents.on("did-finish-load", () => {
-  if (backendPort) {
-    win.webContents.send("backend-port", backendPort);
-  }
-});
 
 // --- BACKEND PATH ---
 function getBackendPath() {
@@ -144,7 +144,7 @@ function startBackend() {
     if (match) {
       backendPort = parseInt(match[1], 10);
       console.log(`✅ Backend draait op poort ${backendPort}`);
-      
+
       BrowserWindow.getAllWindows().forEach((w) => {
         w.webContents.send("backend-port", backendPort);
       });
