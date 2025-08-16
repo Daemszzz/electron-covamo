@@ -3,7 +3,6 @@ const path = require("path");
 const { spawn } = require("child_process");
 const os = require("os");
 const fs = require("fs");
-// const crypto = require("crypto");
 const http = require("http");
 
 const isDev = !app.isPackaged;
@@ -22,7 +21,7 @@ function createWindow() {
 
   if (isDev) {
     let attempts = 0;
-    const maxAttempts = 10;
+    const maxAttempts = 15;
 
     const tryLoad = () => {
       attempts++;
@@ -32,6 +31,10 @@ function createWindow() {
           setTimeout(tryLoad, 1000);
         } else {
           console.error("❌ Kan Vite dev server niet bereiken!");
+          dialog.showErrorBox(
+            "Frontend fout",
+            "Vite dev server reageert niet."
+          );
         }
       });
     };
@@ -42,51 +45,10 @@ function createWindow() {
     const indexPath = path.join(process.resourcesPath, "dist", "index.html");
     win.loadFile(indexPath).catch((err) => {
       console.error("❌ Kan index.html niet laden:", err);
+      dialog.showErrorBox("Frontend fout", err.message);
     });
   }
 }
-
-// function decryptEnv() {
-//   if (isDev) return;
-
-//   const secretKey = process.env.ENV_SECRET_KEY;
-//   if (!secretKey) {
-//     dialog.showErrorBox("Configuratiefout", "ENV_SECRET_KEY is niet gezet!");
-//     app.quit();
-//     return;
-//   }
-
-//   const encPath = path.join(process.resourcesPath, "backend", ".env.enc");
-//   if (!fs.existsSync(encPath)) {
-//     dialog.showErrorBox("Backend fout", "Versleutelde .env.enc niet gevonden!");
-//     app.quit();
-//     return;
-//   }
-
-//   try {
-//     const encryptedData = JSON.parse(fs.readFileSync(encPath, "utf-8"));
-//     const iv = Buffer.from(encryptedData.iv, "hex");
-//     const content = Buffer.from(encryptedData.content, "hex");
-
-//     const decipher = crypto.createDecipheriv(
-//       "aes-256-ctr",
-//       crypto.createHash("sha256").update(secretKey).digest(),
-//       iv
-//     );
-
-//     const decrypted = Buffer.concat([
-//       decipher.update(content),
-//       decipher.final(),
-//     ]);
-//     const envPath = path.join(process.resourcesPath, "backend", ".env");
-
-//     fs.writeFileSync(envPath, decrypted);
-//     console.log("✅ .env gedecodeerd en geschreven naar:", envPath);
-//   } catch (err) {
-//     dialog.showErrorBox("Decryptie fout", err.message);
-//     app.quit();
-//   }
-// }
 
 function getBackendPath() {
   const base = isDev
@@ -100,7 +62,7 @@ function getBackendPath() {
   }
 }
 
-function waitForBackend(port, retries = 10, delay = 1000) {
+function waitForBackend(port, retries = 15, delay = 1000) {
   return new Promise((resolve, reject) => {
     const attempt = (count) => {
       http
@@ -126,8 +88,6 @@ function waitForBackend(port, retries = 10, delay = 1000) {
 }
 
 function startBackend() {
-  // decryptEnv();
-
   const backendPath = getBackendPath();
 
   if (!fs.existsSync(backendPath)) {
@@ -140,7 +100,6 @@ function startBackend() {
   }
 
   let command, args;
-
   if (backendPath.endsWith(".py")) {
     command = os.platform() === "win32" ? "python" : "python3";
     args = [backendPath, `--port=${API_PORT}`];

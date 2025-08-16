@@ -36,13 +36,9 @@ jobs:
 
       - name: Build backend + frontend
         run: npm run build
-        env:
-          ENV_SECRET_KEY: ${{ secrets.ENV_SECRET_KEY }}
-
+        
       - name: Build Electron Windows App
         run: npm run electron:build
-        env:
-          ENV_SECRET_KEY: ${{ secrets.ENV_SECRET_KEY }}
 
       - name: Upload Windows installer
         uses: actions/upload-artifact@v4

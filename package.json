@@ -46,8 +46,8 @@
         "to": "backend/app.exe"
       },
       {
-        "from": "backend/.env.enc",
-        "to": "backend/.env.enc"
+        "from": "backend/.env",
+        "to": "backend/.env"
       }
     ],
     "mac": {
