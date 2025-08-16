@@ -6,7 +6,6 @@
   "author": "Daems Kevin",
   "main": "electron/main.cjs",
   "scripts": {
-    "prebuild": "node encrypt-env.js",
     "dev": "concurrently \"vite\" \"npm run backend-auto\" \"wait-on http://localhost:5173 && electron .\"",
     "backend-auto": "node scripts/start-backend.js",
     "build:frontend": "vite build",
