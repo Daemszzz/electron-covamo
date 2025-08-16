@@ -59,11 +59,12 @@ function getBackendPath() {
 
   if (os.platform() === "win32") {
     return isDev ? path.join(base, "launcher.py") : path.join(base, "app.exe");
-  } else if (isDev) {
-    return path.join(base, "launcher.py");
-  } else {
-    // macOS onedir build
+  } else if (os.platform() === "darwin") {
+    if (isDev) return path.join(base, "launcher.py");
+    // Mac: pak het executable bestand binnen de .app bundle
     return path.join(base, "app.app", "Contents", "MacOS", "app");
+  } else {
+    return isDev ? path.join(base, "launcher.py") : path.join(base, "app");
   }
 }
 

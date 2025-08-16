@@ -46,19 +46,24 @@
       "!**/*.map"
     ],
     "extraResources": [
-      {
-        "from": "backend/dist/app.exe",
-        "to": "backend/app.exe"
-      },
-      {
-        "from": "backend/dist/app",
-        "to": "backend/app"
-      },
-      {
-        "from": "backend/.env",
-        "to": "backend/.env"
-      }
-    ],
+    {
+     "from": "backend/dist/app.exe",
+     "to": "backend/app.exe"
+    },
+    {
+     "from": "backend/dist/app",
+     "to": "backend/app"
+   },
+    {
+      "from": "backend/dist/app.app",
+      "to": "backend/app.app"
+    },
+   {
+      "from": "backend/.env",
+      "to": "backend/.env"
+    }
+  ],
+  
     "mac": {
       "target": "dmg",
       "category": "public.app-category.productivity",
