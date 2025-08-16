@@ -31,6 +31,7 @@
     "appId": "be.jouwbedrijf.covamo",
     "productName": "Covamo Electron",
     "asar": true,
+    "publish": null,
     "files": [
       "dist",
       "electron",
