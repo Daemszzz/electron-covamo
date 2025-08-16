@@ -1,180 +1,192 @@
 <template>
   <div id="app">
-    <h1>Zoek Tweedehands Wagen</h1>
-
-    <form @submit.prevent="zoekWagen">
-      <input v-model="zoekId" placeholder="Voer ID in" />
-      <button :disabled="loading">Zoeken</button>
-    </form>
-
-    <div v-if="loading" class="loader-container">
-      <div class="loader"></div>
-      <p>Bezig met laden...</p>
+    <div v-if="!backendReady" class="splash">
+      <h2>🚀 Backend aan het starten...</h2>
+      <p>Even geduld, de applicatie wordt klaargemaakt.</p>
+      <div class="spinner"></div>
     </div>
 
-    <div v-if="error" class="error">{{ error }}</div>
+    <div id="app">
+      <h1>Zoek Tweedehands Wagen</h1>
 
-    <div v-if="wagen" class="gele-fiche print-preview">
-      <div class="fiche-grid">
-        <div class="fiche-links-container">
-          <div class="fiche-links">
-            <div class="kader">
-              <p>
-                MERK
-                <span
-                  ><strong>{{ wagen.model }}</strong></span
-                >
-              </p>
-              <p>
-                TYPE
-                <span
-                  ><strong>{{ wagen.modelExecution }}</strong></span
-                >
-              </p>
-              <p>
-                KLEUR
-                <span
-                  ><strong>{{ wagen.color }}</strong></span
-                >
-              </p>
-              <p>
-                CHASSISNUMMER
-                <span
-                  ><strong>{{ wagen.chassis }}</strong></span
-                >
-              </p>
-              <p>
-                INSCHRIJVINGSDATUM
-                <span
-                  ><strong>{{ wagen.inschrijving }}</strong></span
-                >
-              </p>
-              <p>
-                VORIGE EIGENAAR
-                <span
-                  class="editable-text"
-                  contenteditable="true"
-                  spellcheck="false"
-                  :inner-text="wagen.vorigeEigenaar"
-                  @input="updateVorigeEigenaar"
-                ></span>
-              </p>
-            </div>
+      <form @submit.prevent="zoekWagen">
+        <input v-model="zoekId" placeholder="Voer ID in" />
+        <button :disabled="loading">Zoeken</button>
+      </form>
 
-            <div class="kader">
-              <p>
-                INSCHRIJVING
-                <span
-                  ><input type="checkbox" :checked="wagen.inschrijvingCheckbox"
-                /></span>
-              </p>
-              <p>
-                GELIJKVORMIGHEIDSATTEST
-                <span
-                  ><input
-                    type="checkbox"
-                    :checked="wagen.gelijkvormigheidsattest"
-                /></span>
-              </p>
-              <p>
-                KEURINGSKAART
-                <span
-                  ><input type="checkbox" :checked="wagen.keuringskaart"
-                /></span>
-              </p>
-            </div>
+      <div v-if="loading" class="loader-container">
+        <div class="loader"></div>
+        <p>Bezig met laden...</p>
+      </div>
 
-            <div class="kader">
-              <p>
-                MARGE
-                <span
-                  ><input type="checkbox" :checked="wagen.vatType === 'Marge'"
-                /></span>
-              </p>
-              <p>
-                BTW
-                <span
-                  ><input type="checkbox" :checked="wagen.vatType === 'BTW'"
-                /></span>
-              </p>
-            </div>
-          </div>
-        </div>
+      <div v-if="error" class="error">{{ error }}</div>
 
-        <div class="fiche-rechts-container">
-          <div class="fiche-rechts">
-            <div class="kader idnummer">
-              <p>ID NUMMER</p>
-              <p class="groot">
-                <strong>{{ wagen.id }}</strong>
-              </p>
-            </div>
-
-            <div class="kader kmstand">
-              <p>
-                KM STAND
-                <span
-                  ><strong>{{ wagen.km }}</strong></span
-                >
-              </p>
-            </div>
-
-            <div class="kader opmerkingen">
-              <p>Opmerkingen</p>
-              <div class="opm-box">
-                <strong>
+      <div v-if="wagen" class="gele-fiche print-preview">
+        <div class="fiche-grid">
+          <div class="fiche-links-container">
+            <div class="fiche-links">
+              <div class="kader">
+                <p>
+                  MERK
+                  <span
+                    ><strong>{{ wagen.model }}</strong></span
+                  >
+                </p>
+                <p>
+                  TYPE
+                  <span
+                    ><strong>{{ wagen.modelExecution }}</strong></span
+                  >
+                </p>
+                <p>
+                  KLEUR
+                  <span
+                    ><strong>{{ wagen.color }}</strong></span
+                  >
+                </p>
+                <p>
+                  CHASSISNUMMER
+                  <span
+                    ><strong>{{ wagen.chassis }}</strong></span
+                  >
+                </p>
+                <p>
+                  INSCHRIJVINGSDATUM
+                  <span
+                    ><strong>{{ wagen.inschrijving }}</strong></span
+                  >
+                </p>
+                <p>
+                  VORIGE EIGENAAR
                   <span
                     class="editable-text"
                     contenteditable="true"
                     spellcheck="false"
-                    :inner-text="wagen.remarks"
-                    @input="updateRemarks"
+                    :inner-text="wagen.vorigeEigenaar"
+                    @input="updateVorigeEigenaar"
                   ></span>
-                </strong>
+                </p>
+              </div>
+
+              <div class="kader">
+                <p>
+                  INSCHRIJVING
+                  <span
+                    ><input
+                      type="checkbox"
+                      :checked="wagen.inschrijvingCheckbox"
+                  /></span>
+                </p>
+                <p>
+                  GELIJKVORMIGHEIDSATTEST
+                  <span
+                    ><input
+                      type="checkbox"
+                      :checked="wagen.gelijkvormigheidsattest"
+                  /></span>
+                </p>
+                <p>
+                  KEURINGSKAART
+                  <span
+                    ><input type="checkbox" :checked="wagen.keuringskaart"
+                  /></span>
+                </p>
+              </div>
+
+              <div class="kader">
+                <p>
+                  MARGE
+                  <span
+                    ><input
+                      type="checkbox"
+                      :checked="wagen.vatType === 'Marge'"
+                  /></span>
+                </p>
+                <p>
+                  BTW
+                  <span
+                    ><input type="checkbox" :checked="wagen.vatType === 'BTW'"
+                  /></span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="fiche-rechts-container">
+            <div class="fiche-rechts">
+              <div class="kader idnummer">
+                <p>ID NUMMER</p>
+                <p class="groot">
+                  <strong>{{ wagen.id }}</strong>
+                </p>
+              </div>
+
+              <div class="kader kmstand">
+                <p>
+                  KM STAND
+                  <span
+                    ><strong>{{ wagen.km }}</strong></span
+                  >
+                </p>
+              </div>
+
+              <div class="kader opmerkingen">
+                <p>Opmerkingen</p>
+                <div class="opm-box">
+                  <strong>
+                    <span
+                      class="editable-text"
+                      contenteditable="true"
+                      spellcheck="false"
+                      :inner-text="wagen.remarks"
+                      @input="updateRemarks"
+                    ></span>
+                  </strong>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="prijzen-onderaan">
-        <div class="prijzen-kader">
-          <p>
-            AK
-            <span
-              ><strong
-                >€
-                {{
-                  parseFloat(wagen.priceDealer).toLocaleString("nl-BE", {
-                    minimumFractionDigits: 2,
-                  })
-                }}</strong
-              ></span
-            >
-          </p>
-          <p>
-            VK
-            <span
-              ><strong
-                >€
-                {{
-                  parseFloat(wagen.priceNet).toLocaleString("nl-BE", {
-                    minimumFractionDigits: 2,
-                  })
-                }}</strong
-              ></span
-            >
-          </p>
+        <div class="prijzen-onderaan">
+          <div class="prijzen-kader">
+            <p>
+              AK
+              <span
+                ><strong
+                  >€
+                  {{
+                    parseFloat(wagen.priceDealer).toLocaleString("nl-BE", {
+                      minimumFractionDigits: 2,
+                    })
+                  }}</strong
+                ></span
+              >
+            </p>
+            <p>
+              VK
+              <span
+                ><strong
+                  >€
+                  {{
+                    parseFloat(wagen.priceNet).toLocaleString("nl-BE", {
+                      minimumFractionDigits: 2,
+                    })
+                  }}</strong
+                ></span
+              >
+            </p>
+          </div>
         </div>
       </div>
-    </div>
 
-    <button @click="afdrukken">Afdrukken</button>
+      <button @click="afdrukken">Afdrukken</button>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import axios from "axios";
 
 const zoekId = ref("");
@@ -183,7 +195,38 @@ const error = ref("");
 const loading = ref(false);
 const apiUrl = import.meta.env.VITE_API_URL;
 
+const backendReady = ref(false);
+
+async function waitForBackendReady(retries = 15, delay = 1000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const res = await axios.get(`${apiUrl}/health`, { timeout: 1000 });
+      if (res.status === 200 && res.data.status === "ok") {
+        return true;
+      }
+    } catch {}
+    await new Promise((r) => setTimeout(r, delay));
+  }
+  return false;
+}
+
+onMounted(async () => {
+  loading.value = true;
+  const ready = await waitForBackendReady();
+  backendReady.value = ready;
+  loading.value = false;
+
+  if (!ready) {
+    error.value = "Backend niet bereikbaar. Start de applicatie opnieuw.";
+  }
+});
+
 const zoekWagen = async () => {
+  if (!backendReady.value) {
+    error.value = "Backend is nog niet klaar.";
+    return;
+  }
+
   error.value = "";
   wagen.value = null;
   loading.value = true;
@@ -193,6 +236,7 @@ const zoekWagen = async () => {
     loading.value = false;
     return;
   }
+
   console.log("API URL:", apiUrl);
 
   try {
@@ -205,7 +249,7 @@ const zoekWagen = async () => {
       keuringskaart: false,
     };
   } catch (err) {
-    if (err.response && err.response.data && err.response.data.error) {
+    if (err.response?.data?.error) {
       error.value = err.response.data.error;
     } else {
       error.value = "Voertuig niet gevonden of fout bij ophalen.";
@@ -214,24 +258,42 @@ const zoekWagen = async () => {
     loading.value = false;
   }
 };
-
-const updateVorigeEigenaar = (e) => {
-  wagen.value.vorigeEigenaar = e.target.innerText;
-};
-
-const updateRemarks = (e) => {
-  wagen.value.remarks = e.target.innerText;
-};
-
-const afdrukken = () => {
-  window.print();
-};
 </script>
 
 <style>
 #app {
   background-color: #fff;
   color: #000;
+}
+
+.splash {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: #f5f5f5;
+  color: #333;
+  text-align: center;
+}
+
+.spinner {
+  margin-top: 20px;
+  border: 6px solid #eee;
+  border-top: 6px solid #0078d7;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .gele-fiche {

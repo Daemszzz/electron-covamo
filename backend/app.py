@@ -18,6 +18,9 @@ CORS(app, supports_credentials=True)
 USERNAME = os.getenv("COVAMO_USERNAME")
 PASSWORD = os.getenv("COVAMO_PASSWORD")
 
+@app.route("/health", methods=["GET"])
+def health():
+    return jsonify({"status": "ok"}), 200
 @app.route('/api/zoek/<string:zoek_id>', methods=['GET'])
 def zoek_voertuig(zoek_id):
     options = Options()

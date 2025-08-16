@@ -9,9 +9,11 @@
     "prebuild": "node encrypt-env.js",
     "dev": "concurrently \"vite\" \"npm run backend-auto\" \"wait-on http://localhost:5173 && electron .\"",
     "backend-auto": "node scripts/start-backend.js",
-    "build": "vite build",
-    "electron:build": "npx electron-builder --win --x64",
-    "electron:build:mac": "npx electron-builder --mac"
+    "build:frontend": "vite build",
+    "build:backend": "cd backend && pyinstaller --onefile --noconsole --name app app.py",
+    "build": "npm run build:backend && npm run build:frontend",
+    "electron:build": "npm run build && npx electron-builder --win --x64",
+    "electron:build:mac": "npm run build && npx electron-builder --mac"
   },
   "dependencies": {
     "vue": "^3.5.17"
@@ -29,12 +31,9 @@
     "appId": "be.jouwbedrijf.covamo",
     "productName": "Covamo Electron",
     "asar": true,
-    "publish": null,
     "files": [
       "dist",
       "electron",
-      "backend/dist",
-      "backend/.env.enc",
       "main.cjs",
       "package.json",
       "!**/*.ts",
@@ -42,8 +41,8 @@
     ],
     "extraResources": [
       {
-        "from": "backend/dist",
-        "to": "backend"
+        "from": "backend/dist/app.exe",
+        "to": "backend/app.exe"
       },
       {
         "from": "backend/.env.enc",
@@ -57,8 +56,7 @@
     },
     "win": {
       "target": "nsis",
-      "icon": "build/icon.ico",
-      "publish": null
+      "icon": "build/icon.ico"
     },
     "nsis": {
       "oneClick": false,
