@@ -10,6 +10,7 @@ let backendProcess = null;
 const API_PORT = 8000;
 const FRONTEND_DEV_URL = "http://localhost:5173";
 
+// --- WINDOW ---
 function createWindow() {
   const win = new BrowserWindow({
     width: 1200,
@@ -50,6 +51,7 @@ function createWindow() {
   }
 }
 
+// --- BACKEND PATH ---
 function getBackendPath() {
   const base = isDev
     ? path.join(__dirname, "backend")
@@ -62,38 +64,45 @@ function getBackendPath() {
   }
 }
 
+// --- BACKEND HEALTH CHECK ---
 function waitForBackend(port, retries = 15, delay = 1000) {
   return new Promise((resolve, reject) => {
     const attempt = (count) => {
       http
         .get(`http://localhost:${port}/health`, (res) => {
-          if (res.statusCode === 200) {
-            resolve();
-          } else if (count > 0) {
-            setTimeout(() => attempt(count - 1), delay);
-          } else {
-            reject(new Error("Backend reageert niet"));
-          }
+          if (res.statusCode === 200) resolve();
+          else if (count > 0) setTimeout(() => attempt(count - 1), delay);
+          else reject(new Error("Backend reageert niet"));
         })
         .on("error", () => {
-          if (count > 0) {
-            setTimeout(() => attempt(count - 1), delay);
-          } else {
-            reject(new Error("Backend niet bereikbaar"));
-          }
+          if (count > 0) setTimeout(() => attempt(count - 1), delay);
+          else reject(new Error("Backend niet bereikbaar"));
         });
     };
     attempt(retries);
   });
 }
 
+// --- START BACKEND ---
 function startBackend() {
   const backendPath = getBackendPath();
+  const envPath = path.join(path.dirname(backendPath), ".env");
 
+  // Check of backend executable of script bestaat
   if (!fs.existsSync(backendPath)) {
     dialog.showErrorBox(
       "Backend fout",
       `Backend bestand niet gevonden:\n${backendPath}`
+    );
+    app.quit();
+    return;
+  }
+
+  // Check of .env aanwezig is
+  if (!fs.existsSync(envPath)) {
+    dialog.showErrorBox(
+      "Backend fout",
+      `.env bestand niet gevonden:\n${envPath}\nZorg dat het voor de build is aangemaakt.`
     );
     app.quit();
     return;
@@ -110,19 +119,18 @@ function startBackend() {
 
   console.log(`🚀 Start backend: ${command} ${args.join(" ")}`);
 
-  const stdioConfig = isDev ? "inherit" : ["ignore", "pipe", "pipe"];
+  const stdioConfig = isDev ? "inherit" : ["pipe", "pipe", "pipe"];
   backendProcess = spawn(command, args, {
     shell: true,
     stdio: stdioConfig,
     windowsHide: !isDev,
   });
 
-  if (!isDev) {
-    const logFile = path.join(app.getPath("userData"), "backend.log");
-    const logStream = fs.createWriteStream(logFile, { flags: "a" });
-    backendProcess.stdout.pipe(logStream);
-    backendProcess.stderr.pipe(logStream);
-  }
+  // Log naar bestand in userData
+  const logFile = path.join(app.getPath("userData"), "backend.log");
+  const logStream = fs.createWriteStream(logFile, { flags: "a" });
+  backendProcess.stdout.pipe(logStream);
+  backendProcess.stderr.pipe(logStream);
 
   backendProcess.on("error", (err) => {
     dialog.showErrorBox(
@@ -138,6 +146,7 @@ function startBackend() {
   return waitForBackend(API_PORT, 15, 1000);
 }
 
+// --- STOP BACKEND ---
 function stopBackend() {
   if (backendProcess) {
     backendProcess.kill();
@@ -145,6 +154,7 @@ function stopBackend() {
   }
 }
 
+// --- APP LIFECYCLE ---
 app.whenReady().then(async () => {
   try {
     await startBackend();
