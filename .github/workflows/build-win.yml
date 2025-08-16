@@ -1,4 +1,4 @@
-name: Build Electron App (Windows)
+name: Build Electron App
 
 on:
   push:
@@ -49,46 +49,45 @@ jobs:
           name: windows-installer
           path: dist/*.exe
 
-  # build-macos:
-  #   runs-on: macos-latest
-  #   name: Build macOS App
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v3
+  build-macos:
+    runs-on: macos-latest
+    name: Build macOS App
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-  #     - name: Setup Node.js
-  #       uses: actions/setup-node@v3
-  #       with:
-  #         node-version: 20
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
 
-  #     - name: Setup Python
-  #       uses: actions/setup-python@v4
-  #       with:
-  #         python-version: 3.11
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
 
-  #     - name: Install dependencies
-  #       run: |
-  #         npm install
-  #         python -m pip install --upgrade pip
-  #         pip install -r backend/requirements.txt pyinstaller
+      - name: Install dependencies
+        run: |
+          npm install
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt pyinstaller
 
-  #     - name: Create backend .env
-  #       run: |
-  #         echo "COVAMO_USERNAME=${{ secrets.COVAMO_USERNAME }}" >> backend/.env
-  #         echo "COVAMO_PASSWORD=${{ secrets.COVAMO_PASSWORD }}" >> backend/.env
+      - name: Create backend .env
+        run: |
+          echo "COVAMO_USERNAME=${{ secrets.COVAMO_USERNAME }}" >> backend/.env
+          echo "COVAMO_PASSWORD=${{ secrets.COVAMO_PASSWORD }}" >> backend/.env
 
-  #     - name: Build backend + frontend
-  #       run: npm run build
-  #       env:
-  #         ENV_SECRET_KEY: ${{ secrets.ENV_SECRET_KEY }}
+      - name: Build backend + frontend
+        run: npm run build
 
-  #     - name: Build Electron macOS App
-  #       run: npm run electron:build:mac
-  #       env:
-  #         ENV_SECRET_KEY: ${{ secrets.ENV_SECRET_KEY }}
+      - name: Build Electron macOS App
+        run: npm run electron:build:mac
 
-  #     - name: Upload macOS dmg
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: macos-installer
-  #         path: dist/*.dmg
+      - name: Clean backend .env
+        run: rm backend/.env
+        
+      - name: Upload macOS dmg
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-installer
+          path: dist/*.dmg
