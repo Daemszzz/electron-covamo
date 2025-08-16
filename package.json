@@ -8,11 +8,17 @@
   "scripts": {
     "dev": "concurrently \"vite\" \"npm run backend-auto\" \"wait-on http://localhost:5173 && electron .\"",
     "backend-auto": "node scripts/start-backend.js",
+
     "build:frontend": "vite build",
-    "build:backend": "cd backend && pyinstaller --onefile --noconsole --name app app.py",
+
+    "build:backend:win": "cd backend && pyinstaller --onefile --noconsole --name app app.py",
+    "build:backend:mac": "cd backend && pyinstaller --noconsole --name app --onedir app.py",
+
+    "build:backend": "npm run build:backend:win",
     "build": "npm run build:backend && npm run build:frontend",
+
     "electron:build": "npm run build && npx electron-builder --win --x64",
-    "electron:build:mac": "npm run build && npx electron-builder --mac"
+    "electron:build:mac": "npm run build:backend:mac && npm run build:frontend && npx electron-builder --mac"
   },
   "dependencies": {
     "vue": "^3.5.17"
@@ -43,6 +49,10 @@
       {
         "from": "backend/dist/app.exe",
         "to": "backend/app.exe"
+      },
+      {
+        "from": "backend/dist/app",
+        "to": "backend/app"
       },
       {
         "from": "backend/.env",

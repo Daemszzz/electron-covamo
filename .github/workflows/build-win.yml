@@ -72,20 +72,25 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt pyinstaller
 
+      - name: Remove old backend dist folder
+        run: rm -rf backend/dist
+
       - name: Create backend .env
         run: |
           echo "COVAMO_USERNAME=${{ secrets.COVAMO_USERNAME }}" >> backend/.env
           echo "COVAMO_PASSWORD=${{ secrets.COVAMO_PASSWORD }}" >> backend/.env
 
-      - name: Build backend + frontend
-        run: npm run build
+      - name: Build backend (macOS) + frontend
+        run: |
+          npm run build:backend:mac
+          npm run build:frontend
 
       - name: Build Electron macOS App
         run: npm run electron:build:mac
 
       - name: Clean backend .env
         run: rm backend/.env
-        
+
       - name: Upload macOS dmg
         uses: actions/upload-artifact@v4
         with:

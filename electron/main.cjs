@@ -59,8 +59,11 @@ function getBackendPath() {
 
   if (os.platform() === "win32") {
     return isDev ? path.join(base, "launcher.py") : path.join(base, "app.exe");
+  } else if (isDev) {
+    return path.join(base, "launcher.py");
   } else {
-    return isDev ? path.join(base, "launcher.py") : path.join(base, "app");
+    // macOS onedir build
+    return path.join(base, "app.app", "Contents", "MacOS", "app");
   }
 }
 
@@ -86,9 +89,10 @@ function waitForBackend(port, retries = 15, delay = 1000) {
 // --- START BACKEND ---
 function startBackend() {
   const backendPath = getBackendPath();
-  const envPath = path.join(path.dirname(backendPath), ".env");
+  const envPath = isDev
+    ? path.join(__dirname, "backend", ".env")
+    : path.join(process.resourcesPath, "backend", ".env");
 
-  // Check of backend executable of script bestaat
   if (!fs.existsSync(backendPath)) {
     dialog.showErrorBox(
       "Backend fout",
@@ -98,11 +102,10 @@ function startBackend() {
     return;
   }
 
-  // Check of .env aanwezig is
   if (!fs.existsSync(envPath)) {
     dialog.showErrorBox(
       "Backend fout",
-      `.env bestand niet gevonden:\n${envPath}\nZorg dat het voor de build is aangemaakt.`
+      `.env bestand niet gevonden:\n${envPath}`
     );
     app.quit();
     return;
@@ -126,7 +129,6 @@ function startBackend() {
     windowsHide: !isDev,
   });
 
-  // Log naar bestand in userData
   const logFile = path.join(app.getPath("userData"), "backend.log");
   const logStream = fs.createWriteStream(logFile, { flags: "a" });
   backendProcess.stdout.pipe(logStream);
@@ -139,9 +141,9 @@ function startBackend() {
     );
   });
 
-  backendProcess.on("exit", (code) => {
-    console.log(`ℹ️ Backend gestopt met code ${code}`);
-  });
+  backendProcess.on("exit", (code) =>
+    console.log(`ℹ️ Backend gestopt met code ${code}`)
+  );
 
   return waitForBackend(API_PORT, 15, 1000);
 }
