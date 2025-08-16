@@ -193,9 +193,10 @@ const zoekId = ref("");
 const wagen = ref(null);
 const error = ref("");
 const loading = ref(false);
-const apiUrl = import.meta.env.VITE_API_URL;
-
 const backendReady = ref(false);
+
+// 🚀 haal dynamisch de API URL uit preload
+const apiUrl = window.backend?.getApiUrl?.() || import.meta.env.VITE_API_URL;
 
 async function waitForBackendReady(retries = 15, delay = 1000) {
   for (let i = 0; i < retries; i++) {

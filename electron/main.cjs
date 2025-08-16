@@ -7,7 +7,7 @@ const http = require("http");
 
 const isDev = !app.isPackaged;
 let backendProcess = null;
-const API_PORT = 8000;
+let backendPort = 8000; // wordt overschreven door stdout van backend
 const FRONTEND_DEV_URL = "http://localhost:5173";
 
 // --- WINDOW ---
@@ -51,6 +51,12 @@ function createWindow() {
   }
 }
 
+win.webContents.on("did-finish-load", () => {
+  if (backendPort) {
+    win.webContents.send("backend-port", backendPort);
+  }
+});
+
 // --- BACKEND PATH ---
 function getBackendPath() {
   const base = isDev
@@ -61,7 +67,6 @@ function getBackendPath() {
     return isDev ? path.join(base, "launcher.py") : path.join(base, "app.exe");
   } else if (os.platform() === "darwin") {
     if (isDev) return path.join(base, "launcher.py");
-    // Mac: pak het executable bestand binnen de .app bundle
     return path.join(base, "app.app", "Contents", "MacOS", "app");
   } else {
     return isDev ? path.join(base, "launcher.py") : path.join(base, "app");
@@ -106,7 +111,7 @@ function startBackend() {
   if (!fs.existsSync(envPath)) {
     dialog.showErrorBox(
       "Backend fout",
-      `.env bestand niet gevonden:\n${envPath}`
+      `.env bestand niet gevonden:\n${envPath}\nZorg dat het voor de build is aangemaakt.`
     );
     app.quit();
     return;
@@ -115,21 +120,42 @@ function startBackend() {
   let command, args;
   if (backendPath.endsWith(".py")) {
     command = os.platform() === "win32" ? "python" : "python3";
-    args = [backendPath, `--port=${API_PORT}`];
+    args = [backendPath]; // geen --port meegeven, backend zoekt zelf
   } else {
     command = backendPath;
-    args = [`--port=${API_PORT}`];
+    args = []; // idem
   }
 
   console.log(`🚀 Start backend: ${command} ${args.join(" ")}`);
 
-  const stdioConfig = isDev ? "inherit" : ["pipe", "pipe", "pipe"];
+  const stdioConfig = isDev ? "pipe" : ["pipe", "pipe", "pipe"];
   backendProcess = spawn(command, args, {
     shell: true,
     stdio: stdioConfig,
     windowsHide: !isDev,
   });
 
+  // stdout uitlezen om de poort te detecteren
+  backendProcess.stdout.on("data", (data) => {
+    const text = data.toString();
+    console.log(`[Backend]: ${text}`);
+
+    const match = text.match(/Backend gestart op poort (\d+)/);
+    if (match) {
+      backendPort = parseInt(match[1], 10);
+      console.log(`✅ Backend draait op poort ${backendPort}`);
+      
+      BrowserWindow.getAllWindows().forEach((w) => {
+        w.webContents.send("backend-port", backendPort);
+      });
+    }
+  });
+
+  backendProcess.stderr.on("data", (data) => {
+    console.error(`[Backend ERROR]: ${data.toString()}`);
+  });
+
+  // loggen naar bestand
   const logFile = path.join(app.getPath("userData"), "backend.log");
   const logStream = fs.createWriteStream(logFile, { flags: "a" });
   backendProcess.stdout.pipe(logStream);
@@ -146,7 +172,17 @@ function startBackend() {
     console.log(`ℹ️ Backend gestopt met code ${code}`)
   );
 
-  return waitForBackend(API_PORT, 15, 1000);
+  // wacht tot backend ready is
+  return new Promise((resolve, reject) => {
+    let waited = 0;
+    const interval = setInterval(() => {
+      if (backendPort !== 8000 || waited > 20) {
+        clearInterval(interval);
+        waitForBackend(backendPort).then(resolve).catch(reject);
+      }
+      waited++;
+    }, 500);
+  });
 }
 
 // --- STOP BACKEND ---

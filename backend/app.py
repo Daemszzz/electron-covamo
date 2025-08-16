@@ -8,6 +8,7 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 import os
 import sys
+import socket
 
 env_path = os.path.join(os.path.dirname(__file__), ".env")
 load_dotenv(dotenv_path=env_path)
@@ -21,6 +22,7 @@ PASSWORD = os.getenv("COVAMO_PASSWORD")
 @app.route("/health", methods=["GET"])
 def health():
     return jsonify({"status": "ok"}), 200
+
 @app.route('/api/zoek/<string:zoek_id>', methods=['GET'])
 def zoek_voertuig(zoek_id):
     options = Options()
@@ -101,14 +103,23 @@ def zoek_voertuig(zoek_id):
     finally:
         driver.quit()
 
-if __name__ == "__main__":
-    import sys
+def find_free_port(start_port=8000):
+    port = start_port
+    while True:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            if s.connect_ex(("127.0.0.1", port)) != 0:
+                return port
+            port += 1
 
+if __name__ == "__main__":
     port = 8000
+    # check of er --port=xxxx meegegeven is
     for arg in sys.argv:
         if arg.startswith("--port="):
             port = int(arg.split("=")[1])
 
-    print(f"🚀 Backend gestart op poort {port}")
-    app.run(host="0.0.0.0", port=port, debug=False)
+    # Als die poort bezet is → zoek volgende vrije
+    port = find_free_port(port)
 
+    print(f"🚀 Backend gestart op poort {port}", flush=True)
+    app.run(host="127.0.0.1", port=port, debug=False)
