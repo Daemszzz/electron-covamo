@@ -12,7 +12,7 @@
     "build:frontend": "vite build",
 
     "build:backend:win": "cd backend && pyinstaller --onefile --noconsole --name app app.py",
-    "build:backend:mac": "cd backend && pyinstaller --noconsole --name app --onedir app.py",
+    "build:backend:mac": "cd backend && pyinstaller --noconsole --name app --onedir -y app.py",
 
     "build:backend": "npm run build:backend:win",
     "build": "npm run build:backend && npm run build:frontend",
