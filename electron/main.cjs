@@ -19,7 +19,7 @@ function createWindow() {
       preload: path.join(__dirname, "preload.js"),
     },
   });
-  
+
   win.webContents.on("did-finish-load", () => {
     if (backendPort) {
       win.webContents.send("backend-port", backendPort);
@@ -64,12 +64,12 @@ function getBackendPath() {
     : path.join(process.resourcesPath, "backend");
 
   if (os.platform() === "win32") {
-    return isDev ? path.join(base, "launcher.py") : path.join(base, "app.exe");
+    return isDev ? path.join(base, "app.py") : path.join(base, "app.exe");
   } else if (os.platform() === "darwin") {
-    if (isDev) return path.join(base, "launcher.py");
+    if (isDev) return path.join(base, "app.py");
     return path.join(base, "app.app", "Contents", "MacOS", "app");
   } else {
-    return isDev ? path.join(base, "launcher.py") : path.join(base, "app");
+    return isDev ? path.join(base, "app.py") : path.join(base, "app");
   }
 }
 
